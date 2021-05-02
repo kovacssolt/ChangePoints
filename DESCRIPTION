@@ -1,0 +1,14 @@
+Package: ChangePoints
+Type: Package
+Title: Change Point Detection with structural set of intervals
+Version: 1.1.0
+Author: Tobias Ruckstuhl, Solt Kovacs
+Maintainer: Tobias Ruckstuhl <tobias.ruckstuhl95@gmail.com>
+Description: Includes the 3 functions interval, findcpts, narrowcpts.
+    The function interval provides all the structural set of intervals.
+    The function findcpts is the core function and finds all changepoints over a given threshold and can then apply a criterion to find an optimal set of changepoints.
+    The function narrowcpts prioritizes narrow intervals over larger intervals and outputs the set of changepoints over a certain threshold.
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.1.0
