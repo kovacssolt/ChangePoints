@@ -22,7 +22,7 @@ interval <-function(n,dec=sqrt(2),minl=2){
   for(i in 1:(dep-1)){
     ilen[i] <- n*((1/dec)**i)
     if(ilen[i] < (minl-1)){ dep <- dep-1 }
-    else{ nint[i] <- ceiling(round(n/ilen[i], 14))*2-1 }
+    else{ nint[i] <- ceiling(n/ilen[i]-1e-10)*2-1 }
   }
   dep <- as.integer(dep)
   nsum <- as.integer(1+sum(nint))
