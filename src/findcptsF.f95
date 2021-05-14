@@ -41,7 +41,7 @@ subroutine findcptsF(x,n,dec,dep,ilen,nint,nsum,par,stats,pen,thr,t,t2,tot,bou,b
       if(par .lt. ilen(i)+1) then
 10008 do 10009 k=1,nint(i)
         bou2(j,1)=floor(1+(k-1)*ran(i))
-        bou2(j,2)=ceiling(ilen(i)+(k-1)*ran(i)-1e-14)
+        bou2(j,2)=min(ceiling(ilen(i)+(k-1)*ran(i)-1e-12),n)
         sf=cu(bou2(j,2)+1) - cu(bou2(j,1))
         prev=bou2(j,1)+floor((bou2(j,2)-bou2(j,1))/3.0_c_double)
         sl=cu(prev+1)-cu(bou2(j,1))
@@ -55,7 +55,7 @@ subroutine findcptsF(x,n,dec,dep,ilen,nint,nsum,par,stats,pen,thr,t,t2,tot,bou,b
       else
 10010 do 10013 k=1,nint(i)
         bou2(j,1)=floor(1+(k-1)*ran(i))
-        bou2(j,2)=ceiling(ilen(i)+(k-1)*ran(i)-1e-14)
+        bou2(j,2)=min(ceiling(ilen(i)+(k-1)*ran(i)-1e-12),n)
         sf=cu(bou2(j,2)+1) - cu(bou2(j,1))
         m=bou2(j,2)-bou2(j,1)
 10011 do 10012 l=1,m
