@@ -45,7 +45,7 @@ subroutine narrowcptsF(x,n,dec,dep,ilen,nint,nsum,par,thr,t,bou,bou2,cpts2) bind
       if(par .lt. ilen(i)+1) then
 10008 do 10009 k=1,nint(i)
         bou2(j,1)=floor(1+(k-1)*ran(i))
-        bou2(j,2)=ceiling(ilen(i)+(k-1)*ran(i))
+        bou2(j,2)=ceiling(ilen(i)+(k-1)*ran(i)-1e-14)
         sf=cu(bou2(j,2)+1) - cu(bou2(j,1))
         prev=bou2(j,1)+floor((bou2(j,2)-bou2(j,1))/3.0_c_double)
         sl=cu(prev+1)-cu(bou2(j,1))
@@ -66,7 +66,7 @@ subroutine narrowcptsF(x,n,dec,dep,ilen,nint,nsum,par,thr,t,bou,bou2,cpts2) bind
       else
 10010 do 10013 k=1,nint(i)
         bou2(j,1)=floor(1+(k-1)*ran(i))
-        bou2(j,2)=ceiling(ilen(i)+(k-1)*ran(i))
+        bou2(j,2)=ceiling(ilen(i)+(k-1)*ran(i)-1e-14)
         sf=cu(bou2(j,2)+1) - cu(bou2(j,1))
         m=bou2(j,2)-bou2(j,1)
 10011 do 10012 l=1,m
