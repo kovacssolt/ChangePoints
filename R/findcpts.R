@@ -30,19 +30,19 @@ findcpts <-function(x, dec=sqrt(2), minl=2L, thr=1.3/2*mad(diff(x)/sqrt(2)) * sq
   if(!is.double(x)) {storage.mode(x) <- 'double'}
   
   if(!is.numeric(dec) | !is.vector(dec)) {stop("dec is not a numeric value")}
-  if(length(dec)!=1 | any(dec) <= 1 | any(dec) > 2){stop("dec should be a single numeric value in (1,2]")}
+  if(length(dec)!=1 | any(dec <= 1) | any(dec > 2)){stop("dec should be a single numeric value in (1,2]")}
   if(!is.double(dec)) {storage.mode(dec) <- 'double'}
 
   if(!is.numeric(minl) | !is.vector(minl)) {stop("minl is not an integer value")}
-  if(length(minl)!=1 | any(minl) <= 1 | any(minl) > length(x)){stop("minl should be a single integer value bigger (or equal) than 2 and less or equal than the length of x")}
+  if(length(minl)!=1 | any(minl <= 1) | any(minl > length(x))){stop("minl should be a single integer value bigger (or equal) than 2 and less or equal than the length of x")}
   if(!is.integer(minl)) {storage.mode(minl) <- 'integer'}
 
   if(!is.numeric(thr) | !is.vector(thr)) {stop("thr is not a numeric value")}
-  if(length(thr)!=1 | any(thr) < 0){stop("thr should be a single non-negative value")}
+  if(length(thr)!=1 | any(thr < 0)){stop("thr should be a single non-negative value")}
   if (!is.double(thr)) {storage.mode(thr) <- 'double'}
   
   if(!is.numeric(par) | !is.vector(par)) {stop("par is not an integer value")}
-  if(length(par)!=1 | any(par) < 0 | any(par) > length(x)){stop("par should be a single integer value between 1 and length of x")}
+  if(length(par)!=1 | any(par < 0) | any(par > length(x))){stop("par should be a single integer value between 1 and length of x")}
   if (!is.integer(par)) {storage.mode(par) <- 'integer'}
   
   if(statsonly==TRUE){stats=1L}
