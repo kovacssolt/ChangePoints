@@ -1,11 +1,11 @@
 #' Changpoint Finder
 #'
-#' Function that finds change points in given data set x by evaluating a set of seeded intervals.
+#' Function that finds change points in given data set x by evaluating a set of seeded intervals and performing GREEDY SELECTION.
 #' @param x Data: numeric vector of length n > 2.
 #' @param dec Decay rate: Rate of how fast the different layers will decrease in size. Default is set to sqrt(2). In general, this should be a numeric value in (1,2].
 #' @param minl Minimal theoretical interval length in seeded intervals: The minimal size of intervals to be considered. Default is set to 2. In general, this should be an integer in [2,length(x)].
 #' @param thr Threshold: Only intervals with test statistic (CUSUM) greater or equal than this threshold will be considered. Default is set based on asymptotics. In general, this should be a numeric value in [0, infinity).
-#' @param par Cutoff parameter: Cutoff between full grid search and (naive) optimistic search. Intervals with length lower than the cutoff will be evaulated by full grid search, the rest will be evaluated by (naive) optimistic search. Optimistic search is faster for large intervals (but does not guarantee to find the best split point). Default is set to length(x) which means that full grid search is performed in all intervals.
+#' @param par Cutoff parameter: Cutoff between full grid search and (naive) optimistic search. Intervals with length lower than the cutoff will be evaulated by full grid search, the rest will be evaluated by (naive) optimistic search. Optimistic search is faster for large intervals (roughly from with length bigger than 40), but does not guarantee to find the best split point. Default is set to length(x) which means that full grid search is performed in all intervals.
 #' @param statsonly T/F paramter: If TRUE the function will only calculate and output the test statics (CUSUM) for each interval and omit the selection. Default is set to FALSE, and in that case greedy selection is performed for all intervals with a test statistics value above thr. 
 #' @param penalty Penalty Type: Two kind of penalty types are possible. If penalty="BIC" the Bayesian information criterion penalty type is used. If penalty="MBIC", the modified BIC criterion is used. Default is set to "BIC". 
 #' @return
@@ -24,7 +24,7 @@
 #' @useDynLib ChangePoints
 
 
-findcpts <-function(x, dec=sqrt(2), minl=2L, thr=1.3/2*mad(diff(x)/sqrt(2)) * sqrt(2 * log(length(x))), par=40L, statsonly=FALSE, penalty="BIC"){
+findcpts <-function(x, dec=sqrt(2), minl=2L, thr=1.3/2*mad(diff(x)/sqrt(2)) * sqrt(2 * log(length(x))), par=length(x), statsonly=FALSE, penalty="BIC"){
   if(!is.numeric(x) | !is.vector(x)) {stop("x is not a numeric vector")}
   if(length(x) < 3){stop("length of x should be at least 3")}
   if(!is.double(x)) {storage.mode(x) <- 'double'}
