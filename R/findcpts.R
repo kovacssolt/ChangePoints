@@ -1,7 +1,7 @@
 #' Changpoint Finder
 #'
 #' Function that finds change points in given data set x by evaluating a set of seeded intervals.
-#' @param x Data vector: vector of length n > 2
+#' @param x Data: numeric vector of length n > 2
 #' @param dec Decay rate: Rate of how fast the different layers will decrease in size. Default is set to sqrt(2).
 #' @param minl Minimal theoretical interval-length: The minimal size of intervals to be considered. Default is set to 2.
 #' @param thr Threshold: Only intervals with teststatistic greater equal than this threshold will be considered. Should be greater equal to 0. Default is set to 0.
@@ -25,18 +25,34 @@
 
 
 findcpts <-function(x, dec=sqrt(2), minl=2L, thr=1.3/2*mad(diff(x)/sqrt(2)) * sqrt(2 * log(length(x))), par=40L, statsonly=FALSE, penalty="BIC"){
-  if (!is.double(x)) {storage.mode(n) <- 'double'}
+  if(!is.numeric(x) | !is.vector(x)) {stop("x is not a numeric vector")}
   if(length(x) < 3){stop("length of x should be at least 3")}
-  if (!is.double(dec)) {storage.mode(dec) <- 'double'}
-  if (!is.integer(minl)) {storage.mode(minl) <- 'integer'}
+  if(!is.double(x)) {storage.mode(x) <- 'double'}
+  
+  if(!is.numeric(dec) | !is.vector(dec)) {stop("dec is not a numeric value")}
+  if(length(dec)!=1 | any(dec) <= 1){stop("dec should be a single numeric value bigger than 1")}
+  if(!is.double(dec)) {storage.mode(dec) <- 'double'}
+
+  if(!is.numeric(minl) | !is.vector(minl)) {stop("minl is not an integer value")}
+  if(length(minl)!=1 | any(minl) <= 1 | any(minl) > length(x)){stop("minl should be a single integer value bigger (or equal) than 2 and less or equal than the length of x")}
+  if(!is.integer(minl)) {storage.mode(minl) <- 'integer'}
+
+  if(!is.numeric(thr) | !is.vector(thr)) {stop("thr is not a numeric value")}
+  if(length(thr)!=1 | any(thr) < 0){stop("thr should be a single non-negative value")}
   if (!is.double(thr)) {storage.mode(thr) <- 'double'}
+  
+  if(!is.numeric(par) | !is.vector(par)) {stop("par is not an integer value")}
+  if(length(par)!=1 | any(par) < 0 | any(par) > length(x)){stop("par should be a single integer value between 1 and length of x")}
   if (!is.integer(par)) {storage.mode(par) <- 'integer'}
+  
   if(statsonly==TRUE){stats=1L}
   else if(statsonly==FALSE){stats=2L}
-  else{ stop("statsonly should be TRUE or FALSE")}
+  else{stop("statsonly should be TRUE or FALSE")}
+    
   if(penalty=="BIC"){pen=1L}
   else if(penalty=="MBIC"){pen=2L}
-  else{ stop("Please input a valid penalty criterion: BIC or MBIC") }
+  else{stop("Please input a valid penalty criterion: BIC or MBIC")}
+    
   n <- as.integer(length(x))
   dep <- floor(log(n)/log(dec))
   ilen <- rep(0,dep-1)
@@ -50,7 +66,13 @@ findcpts <-function(x, dec=sqrt(2), minl=2L, thr=1.3/2*mad(diff(x)/sqrt(2)) * sq
   nsum <- as.integer(1+sum(nint))
   nint <- as.integer(nint[1:dep])
   ilen <- as.double(ilen[1:dep])
+  
   obj <- .Call("findcptsC",x,n,dec,dep,ilen,nint,nsum,par,stats,pen,thr)
+  colnames(obj$Cpts2) <- c("cpt", "st", "end")
+  colnames(obj$Cpts)  <- c("CUSUM_original", "SSE", "InfCrit")
+  colnames(obj$int)   <- c("st", "end", "cpt")
+  colnames(obj$val)   <- c("CUSUM") 
+  
   if(statsonly==TRUE){ 
     return(list(Intervals=cbind(obj$int,obj$value))) 
   }
