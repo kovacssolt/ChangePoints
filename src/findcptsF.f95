@@ -98,13 +98,13 @@ subroutine findcptsF(x,n,dec,dep,ilen,nint,nsum,par,stats,pen,thr,t,t2,tot,bou,b
       n2=real(n)
       if(pen .eq. 1) then
 10021 do 10022 i=1,t
-        cpts(i,3)=cpts(i,2)+i*log(n2)
+        cpts(i,3)=n2/2*log(cpts(i,2)/n2)+i*log(n2)
 10022 continue
       else if(pen .eq. 2) then
       prevf=0.0_c_double
 10023 do 10024 i=1,t
         prevf=prevf-log((cpts2(i,3)-cpts2(i,2)+1)/n2)+log((cpts2(i,1)-cpts2(i,2)+1)/n2)+log((cpts2(i,3)-cpts2(i,1))/n2)
-        cpts(i,3)=cpts(i,2)+i*log(n2)*3/2+prevf/2
+        cpts(i,3)=n2/2*log(cpts(i,2)/n2)+i*log(n2)*3/2+prevf/2
 10024 continue
       end if
       t2=minloc(cpts(1:t,3),1)
