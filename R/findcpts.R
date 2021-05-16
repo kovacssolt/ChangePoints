@@ -1,6 +1,6 @@
 #' Changpoint Finder
 #'
-#' Function that finds changepoints in given data set x by evaluating a structural set of intervals which are a subset of the powerset from 1 to length(x)
+#' Function that finds change points in given data set x by evaluating a set of seeded intervals.
 #' @param x Data vector: vector of length n > 2
 #' @param dec Decay rate: Rate of how fast the different layers will decrease in size. Default is set to sqrt(2).
 #' @param minl Minimal theoretical interval-length: The minimal size of intervals to be considered. Default is set to 2.
@@ -10,10 +10,10 @@
 #' @param penalty Penalty Type: Two kind of penalty types are possible. If penalty="BIC" the Bayesian information criterion penalty type is used. If penalty="MBIC" a modified BIC criterion is used. Default is set to "BIC".
 #' @return
 #' A list with the following (except if statsonly=TRUE):
-#' \item{Cpts}{Matrix with 6 columns: changepoint found, start of the location where the changpoint was found, end of the location where the changepoint was found, teststatistic to the interval from where the changepoint was taken from, residual sum of squares including the new changepoint and the corresponding criterion penalty}
+#' \item{Res}{Matrix with 6 columns: changepoint found, start of the location where the changpoint was found, end of the location where the changepoint was found, teststatistic to the interval from where the changepoint was taken from, residual sum of squares including the new changepoint and the corresponding criterion penalty}
 #' \item{Intervals}{Matrix with 4 columns: start point of the interval, end point of the interval, optimal changepoint for that interval (the optimal splitting point is between output and output+1) and corresponding teststatistic}
 #' \item{RSS}{Total residual sum of squares}
-#' \item{OptByCrit}{The optimal value for the criterion penalty. If the values fo OptByCrit and RSS coincide then no changepoint is relevant (will not show up if no changepoints are over the threshold)}
+#' \item{OptInfCrit}{The optimal value for the model selection criterion. If the values fo OptInfCrit and RSS coincide then no changepoint is relevant (will not show up if no changepoints are over the threshold)}
 #' \item{OptCpts}{All changpoints up to the optimal value for the criterion penalty (will not show up if no changepoints are over the threshold)}
 #' @examples
 #' \donttest{
@@ -24,7 +24,7 @@
 #' @useDynLib ChangePoints
 
 
-findcpts <-function(x, dec=sqrt(2), minl=2L, thr=mad(diff(x)/sqrt(2)) * sqrt(2 * log(length(x))), par=40L, statsonly=FALSE, penalty="BIC"){
+findcpts <-function(x, dec=sqrt(2), minl=2L, thr=1.3/2*mad(diff(x)/sqrt(2)) * sqrt(2 * log(length(x))), par=40L, statsonly=FALSE, penalty="BIC"){
   if (!is.double(x)) {storage.mode(n) <- 'double'}
   if(length(x) < 3){stop("length of x should be at least 3")}
   if (!is.double(dec)) {storage.mode(dec) <- 'double'}
@@ -51,8 +51,17 @@ findcpts <-function(x, dec=sqrt(2), minl=2L, thr=mad(diff(x)/sqrt(2)) * sqrt(2 *
   nint <- as.integer(nint[1:dep])
   ilen <- as.double(ilen[1:dep])
   obj <- .Call("findcptsC",x,n,dec,dep,ilen,nint,nsum,par,stats,pen,thr)
-  if(statsonly==TRUE){ return(list(Intervals=cbind(obj$int,obj$value))) }
-  else if(obj$t == 0){ return(list(Cpts="none",Intervals=cbind(obj$int,obj$value), RSS=obj$tot)) }
-  else if(obj$t2 == 0){ return(list(Cpts=cbind(obj$Cpts2[1:obj$t,],obj$Cpts[1:obj$t,]),Intervals=cbind(obj$int,obj$value),RSS=obj$tot,OptByCrit=obj$tot,OptCpts="none" )) }
-  else{ return(list(Cpts=cbind(obj$Cpts2[1:obj$t,],obj$Cpts[1:obj$t,]),Intervals=cbind(obj$int,obj$value),RSS=obj$tot,OptByCrit=obj$Cpts[obj$t2,3],OptCpts=obj$Cpts2[1:obj$t2,1] )) }
+  if(statsonly==TRUE){ 
+    return(list(Intervals=cbind(obj$int,obj$value))) 
+  }
+  else if(obj$t == 0){
+    warning("There was no interval with a test statistic above chosen threshold. Check if thr was set properly.") 
+    return(list(Res=matrix(nrow=0,ncol=6), Intervals=cbind(obj$int,obj$value), RSS=obj$tot, OptInfCrit=n/2*log(obj$tot/n), OptCpts=integer()))
+  }
+  else if(obj$t2 == 0){
+    return(list(Res=cbind(obj$Cpts2[1:obj$t,], obj$Cpts[1:obj$t,]), Intervals=cbind(obj$int,obj$value), RSS=obj$tot, OptInfCrit=n/2*log(obj$tot/n), OptCpts=integer()))
+  }
+  else{
+    return(list(Res=cbind(obj$Cpts2[1:obj$t,], obj$Cpts[1:obj$t,]), Intervals=cbind(obj$int,obj$value), RSS=obj$tot, OptInfCrit=obj$Cpts[obj$t2,3], OptCpts=obj$Cpts2[1:obj$t2,1]))
+  }
 }
