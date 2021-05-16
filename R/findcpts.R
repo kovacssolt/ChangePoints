@@ -1,20 +1,20 @@
 #' Changpoint Finder
 #'
 #' Function that finds change points in given data set x by evaluating a set of seeded intervals.
-#' @param x Data: numeric vector of length n > 2
-#' @param dec Decay rate: Rate of how fast the different layers will decrease in size. Default is set to sqrt(2).
-#' @param minl Minimal theoretical interval-length: The minimal size of intervals to be considered. Default is set to 2.
-#' @param thr Threshold: Only intervals with teststatistic greater equal than this threshold will be considered. Should be greater equal to 0. Default is set to 0.
-#' @param par Cutoff parameter: Cutoff between full search and optimistic search. Intervals with lower length than the cutoff will be evaulated by full search, the rest will be evaluated by optimistic search, which performs faster for large intervals. Default is set to 40.
-#' @param statsonly Binary paramter: If TRUE the function will only calculate and output the teststatics for each interval and omit the changepoint detection. Default is set to FALSE.
-#' @param penalty Penalty Type: Two kind of penalty types are possible. If penalty="BIC" the Bayesian information criterion penalty type is used. If penalty="MBIC" a modified BIC criterion is used. Default is set to "BIC".
+#' @param x Data: numeric vector of length n > 2.
+#' @param dec Decay rate: Rate of how fast the different layers will decrease in size. Default is set to sqrt(2). In general, this should be a numeric value in (1,2].
+#' @param minl Minimal theoretical interval length in seeded intervals: The minimal size of intervals to be considered. Default is set to 2. In general, this should be an integer in [2,length(x)].
+#' @param thr Threshold: Only intervals with test statistic (CUSUM) greater or equal than this threshold will be considered. Default is set based on asymptotics. In general, this should be a numeric value in [0, infinity).
+#' @param par Cutoff parameter: Cutoff between full grid search and (naive) optimistic search. Intervals with length lower than the cutoff will be evaulated by full grid search, the rest will be evaluated by (naive) optimistic search. Optimistic search is faster for large intervals (but does not guarantee to find the best split point). Default is set to length(x) which means that full grid search is performed in all intervals.
+#' @param statsonly T/F paramter: If TRUE the function will only calculate and output the test statics (CUSUM) for each interval and omit the selection. Default is set to FALSE, and in that case greedy selection is performed for all intervals with a test statistics value above thr. 
+#' @param penalty Penalty Type: Two kind of penalty types are possible. If penalty="BIC" the Bayesian information criterion penalty type is used. If penalty="MBIC", the modified BIC criterion is used. Default is set to "BIC". 
 #' @return
 #' A list with the following (except if statsonly=TRUE):
-#' \item{Res}{Matrix with 6 columns: changepoint found, start of the location where the changpoint was found, end of the location where the changepoint was found, teststatistic to the interval from where the changepoint was taken from, residual sum of squares including the new changepoint and the corresponding criterion penalty}
-#' \item{Intervals}{Matrix with 4 columns: start point of the interval, end point of the interval, optimal changepoint for that interval (the optimal splitting point is between output and output+1) and corresponding teststatistic}
-#' \item{RSS}{Total residual sum of squares}
-#' \item{OptInfCrit}{The optimal value for the model selection criterion. If the values fo OptInfCrit and RSS coincide then no changepoint is relevant (will not show up if no changepoints are over the threshold)}
-#' \item{OptCpts}{All changpoints up to the optimal value for the criterion penalty (will not show up if no changepoints are over the threshold)}
+#' \item{Res}{Matrix with 6 columns: found change point; start of interval in which the change point was found; end of the interval in which the change point was found; test statistic (CUSUM) of the (seeded) interval from where the changepoint was taken from (hence, this is a value that can be found in "Intervals" as well); overall sum of squared errors when including the new changepoint additionally to previous ones; and the value of the information criterion corresponding to the segmentation.}
+#' \item{Intervals}{Matrix with 4 columns: start point of the (seeded) interval; end point of the (seeded) interval; found change point withing the interval given by the first two entries; and corresponding test statistic (CUSUM)}
+#' \item{RSS}{Total residual sum of squares of the model without any change points.}
+#' \item{OptInfCrit}{The optimal (minimal) value for the model selection criterion along the solution path. Note: If none of the intervals had a test statistic above the specified threshold (such that the Res matrix has zero rows) or the model with no change point has a smaller corresponding information criterion than models with change points, then this value will coresspond to the information criterion of the model with no change points.)}
+#' \item{OptCpts}{Change points from the optimal segmentation from the solution path (according to the chosen information criterion). Note that the solution path is only calculated for intervals/candidates with a test statistic (CUSUM) above the chosen threshold.}
 #' @examples
 #' \donttest{
 #' x=rnorm(10)
@@ -30,7 +30,7 @@ findcpts <-function(x, dec=sqrt(2), minl=2L, thr=1.3/2*mad(diff(x)/sqrt(2)) * sq
   if(!is.double(x)) {storage.mode(x) <- 'double'}
   
   if(!is.numeric(dec) | !is.vector(dec)) {stop("dec is not a numeric value")}
-  if(length(dec)!=1 | any(dec) <= 1){stop("dec should be a single numeric value bigger than 1")}
+  if(length(dec)!=1 | any(dec) <= 1 | any(dec) > 2){stop("dec should be a single numeric value in (1,2]")}
   if(!is.double(dec)) {storage.mode(dec) <- 'double'}
 
   if(!is.numeric(minl) | !is.vector(minl)) {stop("minl is not an integer value")}
