@@ -24,7 +24,7 @@
 #' @useDynLib ChangePoints
 
 
-findcpts <-function(x, dec=sqrt(2), minl=2L, thr=0.0, par=40L, statsonly=FALSE, penalty="BIC"){
+findcpts <-function(x, dec=sqrt(2), minl=2L, thr=mad(diff(x)/sqrt(2)) * sqrt(2 * log(length(x))), par=40L, statsonly=FALSE, penalty="BIC"){
   if (!is.double(x)) {storage.mode(n) <- 'double'}
   if(length(x) < 3){stop("length of x should be at least 3")}
   if (!is.double(dec)) {storage.mode(dec) <- 'double'}
