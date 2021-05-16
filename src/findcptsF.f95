@@ -108,7 +108,8 @@ subroutine findcptsF(x,n,dec,dep,ilen,nint,nsum,par,stats,pen,thr,t,t2,tot,bou,b
 10024 continue
       end if
       t2=minloc(cpts(1:t,3),1)
-      if(cpts(t2,3) .ge. tot) t2=0
+!      if(cpts(t2,3) .ge. tot) t2=0 
+      if(cpts(t2,3) .ge. n2/2*log(tot/n2)) t2=0
       return
 end subroutine findcptsF
 
