@@ -71,19 +71,21 @@ findcpts <-function(x, dec=sqrt(2), minl=2L, thr=1.3/2*mad(diff(x)/sqrt(2)) * sq
   colnames(obj$Cpts2) <- c("cpt", "st", "end")
   colnames(obj$Cpts)  <- c("CUSUM_original", "SSE", "InfCrit")
   colnames(obj$int)   <- c("st", "end", "cpt")
-  colnames(obj$val)   <- c("CUSUM") 
+#  colnames(obj$val)   <- c("CUSUM") 
   
   if(statsonly==TRUE){ 
     return(list(Intervals=cbind(obj$int,obj$value))) 
   }
   else if(obj$t == 0){
     warning("There was no interval with a test statistic above chosen threshold. Check if thr was set properly.") 
-    return(list(Res=matrix(nrow=0,ncol=6), Intervals=cbind(obj$int,obj$value), RSS=obj$tot, OptInfCrit=n/2*log(obj$tot/n), OptCpts=integer()))
+    Res <- matrix(nrow=0,ncol=6)
+    colnames(Res) <- c("cpt", "st", "end", "CUSUM_original", "SSE", "InfCrit")
+    return(list(Res=data.frame(Res), Intervals=data.frame(obj$int,CUSUM = obj$value), RSS=obj$tot, OptInfCrit=n/2*log(obj$tot/n), OptCpts=integer()))
   }
   else if(obj$t2 == 0){
-    return(list(Res=cbind(obj$Cpts2[1:obj$t,], obj$Cpts[1:obj$t,]), Intervals=cbind(obj$int,obj$value), RSS=obj$tot, OptInfCrit=n/2*log(obj$tot/n), OptCpts=integer()))
+    return(list(Res=data.frame(obj$Cpts2[1:obj$t,], obj$Cpts[1:obj$t,]), Intervals=data.frame(obj$int,CUSUM = obj$value), RSS=obj$tot, OptInfCrit=n/2*log(obj$tot/n), OptCpts=integer()))
   }
   else{
-    return(list(Res=cbind(obj$Cpts2[1:obj$t,], obj$Cpts[1:obj$t,]), Intervals=cbind(obj$int,obj$value), RSS=obj$tot, OptInfCrit=obj$Cpts[obj$t2,3], OptCpts=obj$Cpts2[1:obj$t2,1]))
+    return(list(Res=data.frame(obj$Cpts2[1:obj$t,], obj$Cpts[1:obj$t,]), Intervals=data.frame(obj$int,CUSUM = obj$value), RSS=obj$tot, OptInfCrit=obj$Cpts[obj$t2,3], OptCpts=obj$Cpts2[1:obj$t2,1]))
   }
 }
